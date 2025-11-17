@@ -1,0 +1,57 @@
+pipeline {
+    agent any
+
+    stages {
+
+        stage('Checkout Code') {
+            steps {
+                echo "Fetching latest code from GitHub..."
+                checkout scm
+            }
+        }
+
+        stage('Install Node.js & Dependencies') {
+            steps {
+                echo "Installing Node modules..."
+                sh 'npm install'
+            }
+        }
+
+        stage('Install Playwright Browsers') {
+            steps {
+                echo "Installing Playwright browsers..."
+                sh 'npx playwright install'
+            }
+        }
+
+        stage('Run Cucumber Tests') {
+            steps {
+                echo "Running Cucumber + Playwright tests..."
+                sh 'npm test'
+            }
+        }
+
+        stage('Generate Playwright Report') {
+            steps {
+                echo "Generating HTML report..."
+                sh 'npx playwright show-report || true'
+            }
+        }
+    }
+
+    post {
+        always {
+            echo "Archiving reports..."
+            archiveArtifacts artifacts: 'test-results/**', allowEmptyArchive: true
+            junit 'test-results/**/*.xml'
+        }
+
+        success {
+            echo "Pipeline completed successfully ✔"
+        }
+
+        failure {
+            echo "Pipeline failed ❌"
+        }
+    }
+}
