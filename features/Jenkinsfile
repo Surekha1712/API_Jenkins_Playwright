@@ -1,11 +1,15 @@
 pipeline {
     agent any
 
+    tools {
+        nodejs "NodeJS"
+    }
+
     stages {
-        
+
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/YOUR_USERNAME/YOUR_REPO.git'
+                git branch: 'main', url: 'https://github.com/Surekha1712/API_Jenkins_Playwright'
             }
         }
 
@@ -15,15 +19,15 @@ pipeline {
             }
         }
 
-        stage('Run Tests') {
+        stage('Install Playwright Browsers') {
             steps {
-                bat 'npx playwright test'
+                bat 'npx playwright install'
             }
         }
 
-        stage('Archive Report') {
+        stage('Run Cucumber API Tests') {
             steps {
-                archiveArtifacts artifacts: '**/playwright-report/**', fingerprint: true
+                bat 'npm test'
             }
         }
     }
