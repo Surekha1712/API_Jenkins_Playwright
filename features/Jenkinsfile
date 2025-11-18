@@ -2,56 +2,29 @@ pipeline {
     agent any
 
     stages {
-
-        stage('Checkout Code') {
+        
+        stage('Checkout') {
             steps {
-                echo "Fetching latest code from GitHub..."
-                checkout scm
+                git branch: 'main', url: 'https://github.com/YOUR_USERNAME/YOUR_REPO.git'
             }
         }
 
-        stage('Install Node.js & Dependencies') {
+        stage('Install Dependencies') {
             steps {
-                echo "Installing Node modules..."
-                sh 'npm install'
+                bat 'npm install'
             }
         }
 
-        stage('Install Playwright Browsers') {
+        stage('Run Tests') {
             steps {
-                echo "Installing Playwright browsers..."
-                sh 'npx playwright install'
+                bat 'npx playwright test'
             }
         }
 
-        stage('Run Cucumber Tests') {
+        stage('Archive Report') {
             steps {
-                echo "Running Cucumber + Playwright tests..."
-                sh 'npm test'
+                archiveArtifacts artifacts: '**/playwright-report/**', fingerprint: true
             }
-        }
-
-        stage('Generate Playwright Report') {
-            steps {
-                echo "Generating HTML report..."
-                sh 'npx playwright show-report || true'
-            }
-        }
-    }
-
-    post {
-        always {
-            echo "Archiving reports..."
-            archiveArtifacts artifacts: 'test-results/**', allowEmptyArchive: true
-            junit 'test-results/**/*.xml'
-        }
-
-        success {
-            echo "Pipeline completed successfully ✔"
-        }
-
-        failure {
-            echo "Pipeline failed ❌"
         }
     }
 }
